@@ -6,7 +6,6 @@ export const StickyTimer = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [time, setTime] = useState(0);
-  const [bpmMode, setBpmMode] = useState(false);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -32,39 +31,42 @@ export const StickyTimer = () => {
   const handleStop = () => {
     setIsActive(false);
     setTime(0);
-    setBpmMode(false);
   };
 
   return (
     <div
-      className="fixed right-0 top-1/2 -translate-y-1/2 z-50"
+      className="fixed right-0 top-1/2 -translate-y-1/2 z-50 transition-all duration-100"
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
       {/* Collapsed State */}
       {!isExpanded && (
         <div
-          className={`rounded-l-[2rem] px-4 py-8 shadow-2xl transition-all duration-300 ${
-            isActive
-              ? "bg-[hsl(var(--timer-green))] text-[hsl(var(--timer-dark))]"
-              : "bg-[hsl(var(--timer-green))] text-[hsl(var(--timer-dark))]"
-          }`}
-          style={{ minHeight: "200px" }}
+          className="relative bg-[hsl(var(--timer-green))] text-[hsl(var(--timer-dark))] shadow-2xl transition-all duration-300"
+          style={{
+            width: "80px",
+            height: "280px",
+            borderRadius: "40px 0 0 40px",
+          }}
         >
-          <div className="flex flex-col items-center gap-4 text-sm font-medium">
-            <div className="relative">
-              <span className="text-xs">new</span>
-              <Bell className="w-4 h-4 inline-block ml-1" />
+          <div className="flex flex-col items-center justify-between h-full py-6 px-3">
+            <div className="relative flex items-center gap-1">
+              <span className="text-xs font-medium">new</span>
+              <Bell className="w-4 h-4" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </div>
-            <div className="text-xs opacity-80">
-              {isActive ? "Active" : "Ready"}
+            
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-xs font-medium">
+                {isActive ? "Active" : "Ready"}
+              </div>
+              <div className="text-sm font-bold whitespace-nowrap">
+                {formatTime(time)}
+              </div>
             </div>
-            <div className="text-base font-bold whitespace-nowrap">
-              {formatTime(time)}
-            </div>
-            <div className="text-xs opacity-70 text-center">
-              <div>Meeting in</div>
+            
+            <div className="text-xs text-center opacity-80">
+              <div className="mb-1">Meeting in</div>
               <div className="font-semibold">13 min</div>
             </div>
           </div>
@@ -73,78 +75,84 @@ export const StickyTimer = () => {
 
       {/* Expanded State */}
       {isExpanded && (
-        <div
-          className={`animate-bounce-in rounded-l-[3rem] px-8 py-10 shadow-2xl transition-colors duration-300 ${
-            isActive
-              ? "bg-[hsl(var(--timer-green))] text-[hsl(var(--timer-dark))]"
-              : "bg-[hsl(var(--timer-orange))] text-[hsl(var(--timer-dark))]"
-          }`}
-          style={{
-            minWidth: "280px",
-            clipPath: "path('M 0 0 C 0 0, 0 50, 0 100 C 0 150, 30 180, 80 200 C 120 215, 160 225, 200 225 C 240 225, 270 215, 280 180 C 285 160, 285 130, 285 100 C 285 70, 285 40, 280 20 C 270 5, 240 0, 200 0 Z')",
-          }}
-        >
-          <div className="flex flex-col items-center gap-4">
-            {/* Header */}
-            <div className="flex items-center justify-between w-full">
-              <ChevronLeft className="w-5 h-5 opacity-60" />
-              <div className="relative">
-                <span className="text-xs font-medium">new</span>
-                <Bell className="w-4 h-4 inline-block ml-1" />
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        <div className="relative animate-bounce-in">
+          <svg
+            width="400"
+            height="600"
+            viewBox="0 0 400 600"
+            className="absolute top-1/2 right-0 -translate-y-1/2"
+            style={{ pointerEvents: "none" }}
+          >
+            <path
+              d="M 400 0 C 350 0, 320 20, 300 60 C 280 100, 260 140, 220 180 C 180 220, 140 240, 100 270 C 60 300, 20 330, 0 370 L 0 230 C 20 270, 60 300, 100 330 C 140 360, 180 380, 220 420 C 260 460, 280 500, 300 540 C 320 580, 350 600, 400 600 Z"
+              fill={isActive ? "hsl(var(--timer-green))" : "hsl(var(--timer-orange))"}
+              className="transition-all duration-300"
+            />
+          </svg>
+          
+          <div
+            className="relative z-10 pr-12 pl-8 py-12"
+            style={{ width: "340px", minHeight: "600px" }}
+          >
+            <div className="flex flex-col items-center justify-center h-full gap-6">
+              {/* Header */}
+              <div className="flex items-center justify-between w-full px-4">
+                <ChevronLeft className="w-5 h-5 opacity-60" />
+                <div className="relative flex items-center gap-1">
+                  <span className="text-xs font-medium">new</span>
+                  <Bell className="w-4 h-4" />
+                  <span className="absolute -top-1 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                </div>
               </div>
-            </div>
 
-            {/* Timer Display */}
-            <div className="text-5xl font-bold my-4">
-              {formatTime(time)}
-            </div>
+              {/* Timer Display */}
+              <div className="text-6xl font-bold my-6" style={{ color: "hsl(var(--timer-dark))" }}>
+                {formatTime(time)}
+              </div>
 
-            {/* Category */}
-            <div className="text-sm font-semibold mb-2">
-              Marketing / Meetings
-            </div>
+              {/* Category */}
+              <div className="text-base font-semibold mb-4" style={{ color: "hsl(var(--timer-dark))" }}>
+                Marketing / Meetings
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 mb-4">
-              {!isActive ? (
-                <>
-                  <Button
-                    onClick={handleStart}
-                    className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/80 font-semibold px-6 rounded-lg"
-                  >
-                    START
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-semibold px-6 rounded-lg"
-                  >
-                    TASKS
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    onClick={() => setBpmMode(!bpmMode)}
-                    className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/80 font-semibold px-6 rounded-lg"
-                  >
-                    BPM
-                  </Button>
-                  <Button
-                    onClick={handleStop}
-                    variant="outline"
-                    className="border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-semibold px-6 rounded-lg"
-                  >
-                    STOP
-                  </Button>
-                </>
-              )}
-            </div>
+              {/* Action Buttons */}
+              <div className="flex gap-4 mb-6">
+                {!isActive ? (
+                  <>
+                    <Button
+                      onClick={handleStart}
+                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2 rounded-lg text-sm"
+                    >
+                      START
+                    </Button>
+                    <Button
+                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2 rounded-lg text-sm"
+                    >
+                      TASKS
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2 rounded-lg text-sm"
+                    >
+                      BPM
+                    </Button>
+                    <Button
+                      onClick={handleStop}
+                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2 rounded-lg text-sm"
+                    >
+                      STOP
+                    </Button>
+                  </>
+                )}
+              </div>
 
-            {/* Next Meeting */}
-            <div className="text-xs opacity-70 text-center">
-              <div>Meeting in</div>
-              <div className="font-semibold text-sm">13 min</div>
+              {/* Next Meeting */}
+              <div className="text-sm text-center" style={{ color: "hsl(var(--timer-dark))", opacity: 0.8 }}>
+                <div className="mb-1">Meeting in</div>
+                <div className="font-bold text-base">13 min</div>
+              </div>
             </div>
           </div>
         </div>
