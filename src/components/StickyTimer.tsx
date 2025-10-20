@@ -201,21 +201,45 @@ export const StickyTimer = () => {
             style={{ left: 0, transform: side === 'left' ? 'scaleX(-1)' : 'none' }}
           />
           
-          <div 
-            className="absolute inset-0 flex flex-col items-center justify-center px-3 text-[hsl(var(--timer-dark))] cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMeetingInput(true);
-            }}
-          >
-            <div className="text-xs text-center">
-              {nextMeetingTime ? (
-                <>
-                  <div className="mb-1">Meeting in</div>
-                  <div className="font-semibold">{getTimeUntilMeeting()}</div>
-                </>
-              ) : (
-                <div className="font-semibold">No meeting</div>
+          <div className="absolute inset-0 flex flex-col items-center justify-between py-6 px-3 text-[hsl(var(--timer-dark))]">
+            <div className="relative flex items-center gap-1">
+              {hasNewNotifications && <span className="text-xs font-medium">new</span>}
+              <div 
+                className="relative cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setHasNewNotifications(false);
+                  window.open('https://bpm.zoomcharts.com:9000/#/app/notifications', '_blank');
+                }}
+              >
+                <Bell className="w-4 h-4" />
+                {hasNewNotifications && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-xs font-medium">{isActive ? "Active" : "START"}</div>
+              {isActive && (
+                <div className="text-sm font-bold whitespace-nowrap">
+                  {formatTime(time)}
+                </div>
+              )}
+            </div>
+            
+            <div className="text-xs text-center opacity-80">
+              <div 
+                className="mb-1 cursor-pointer hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMeetingInput(true);
+                }}
+              >
+                {nextMeetingTime ? "Meeting in" : "No meeting"}
+              </div>
+              {nextMeetingTime && (
+                <div className="font-semibold">{getTimeUntilMeeting()}</div>
               )}
             </div>
           </div>
