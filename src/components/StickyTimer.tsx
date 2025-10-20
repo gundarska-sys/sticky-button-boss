@@ -13,6 +13,7 @@ export const StickyTimer = () => {
   const [side, setSide] = useState<'left' | 'right'>('right');
   const [isInMeeting, setIsInMeeting] = useState(false);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  const [userSetPosition, setUserSetPosition] = useState(false); // Track if user manually positioned it
   const [position, setPosition] = useState(() => ({
     x: window.innerWidth - 215,
     y: 50, // Start at top
@@ -36,8 +37,10 @@ export const StickyTimer = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Check if in Teams meeting
+  // Check if in Teams meeting - only on initial load
   useEffect(() => {
+    if (userSetPosition) return; // Don't override user position
+    
     const checkTeamsMeeting = () => {
       // Check if running in Teams context or if window title contains "Meeting"
       const inTeams = window.location.href.includes('teams.microsoft.com') || 
@@ -45,7 +48,7 @@ export const StickyTimer = () => {
                       document.title.toLowerCase().includes('teams');
       setIsInMeeting(inTeams);
       
-      // Update position based on meeting status
+      // Update position based on meeting status only if user hasn't set it
       if (inTeams) {
         setPosition(prev => ({
           ...prev,
@@ -60,12 +63,7 @@ export const StickyTimer = () => {
     };
 
     checkTeamsMeeting();
-    
-    // Check periodically for title changes
-    const interval = setInterval(checkTeamsMeeting, 5000);
-    
-    return () => clearInterval(interval);
-  }, []);
+  }, []); // Only run once on mount
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -89,6 +87,7 @@ export const StickyTimer = () => {
           y: Math.max(0, Math.min(newY, window.innerHeight - 487)),
         });
         setSide(newSide);
+        setUserSetPosition(true); // Mark that user has manually positioned it
       }
     };
 
