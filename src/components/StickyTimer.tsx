@@ -94,6 +94,8 @@ export const StickyTimer = () => {
         left: `${position.x}px`,
         top: `${position.y}px`,
         cursor: isDragging ? "grabbing" : "grab",
+        width: "61px",
+        height: "252px",
       }}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => !isDragging && setIsExpanded(false)}
@@ -141,17 +143,15 @@ export const StickyTimer = () => {
             height: "487px",
             top: "50%",
             transform: `translateY(-50%) ${side === 'left' ? 'scaleX(-1)' : ''}`,
-            left: side === 'right' ? '-154px' : 'auto',
-            right: side === 'left' ? '-154px' : 'auto',
+            left: side === 'right' ? '-154px' : '61px',
+            right: side === 'left' ? '0' : 'auto',
+            pointerEvents: 'auto',
           }}
         >
           <img
             src={isActive ? dropletGreen : dropletOrange}
             alt="Timer droplet"
-            className="absolute top-0 w-full h-full transition-all duration-300"
-            style={{ 
-              left: '0',
-            }}
+            className="w-full h-full transition-all duration-300"
           />
           
           <div 
