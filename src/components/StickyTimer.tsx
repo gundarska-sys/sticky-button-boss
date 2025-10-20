@@ -76,65 +76,74 @@ export const StickyTimer = () => {
 
       {/* Expanded State - Droplet Shape */}
       {isExpanded && (
-        <div className="relative animate-bounce-in" style={{ width: "380px", height: "550px" }}>
+        <div className="relative animate-bounce-in" style={{ width: "350px", height: "700px" }}>
           {/* Droplet SVG Background */}
           <svg
-            width="380"
-            height="550"
-            viewBox="0 0 380 550"
+            width="350"
+            height="700"
+            viewBox="0 0 350 700"
             className="absolute top-0 right-0"
             style={{ pointerEvents: "none" }}
           >
-            <defs>
-              <clipPath id="droplet-clip">
-                <path d="M 380 50 C 380 50, 380 100, 350 150 C 320 200, 280 230, 200 280 C 120 330, 60 360, 30 410 C 10 445, 0 470, 0 470 L 0 130 C 0 130, 10 105, 30 140 C 60 190, 120 220, 200 270 C 280 320, 320 350, 350 400 C 380 450, 380 500, 380 500 Z" />
-              </clipPath>
-            </defs>
             <path
-              d="M 380 50 C 380 50, 380 100, 350 150 C 320 200, 280 230, 200 280 C 120 330, 60 360, 30 410 C 10 445, 0 470, 0 470 L 0 130 C 0 130, 10 105, 30 140 C 60 190, 120 220, 200 270 C 280 320, 320 350, 350 400 C 380 450, 380 500, 380 500 Z"
+              d="M 350 60
+                 Q 340 30, 320 10
+                 L 350 0
+                 L 350 700
+                 L 320 690
+                 Q 340 670, 340 640
+                 Q 340 580, 320 520
+                 Q 300 460, 250 420
+                 Q 200 380, 120 350
+                 Q 60 330, 20 320
+                 Q 5 318, 0 318
+                 L 0 382
+                 Q 5 382, 20 380
+                 Q 60 370, 120 350
+                 Q 200 320, 250 280
+                 Q 300 240, 320 180
+                 Q 340 120, 340 60
+                 Q 340 30, 320 10
+                 Z"
               fill={isActive ? "hsl(var(--timer-green))" : "hsl(var(--timer-orange))"}
               className="transition-all duration-300"
             />
           </svg>
           
           {/* Content Inside Droplet */}
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center px-8"
-            style={{ clipPath: "url(#droplet-clip)" }}
-          >
-            <div className="flex flex-col items-center gap-6 text-[hsl(var(--timer-dark))] w-full max-w-[280px]">
-              {/* Header */}
-              <div className="flex items-center justify-between w-full">
-                <ChevronLeft className="w-5 h-5 opacity-60" />
-                <div className="relative flex items-center gap-1">
-                  <span className="text-xs font-medium">new</span>
+          <div className="absolute inset-0 flex items-center justify-center pr-4">
+            <div className="flex flex-col items-center gap-5 text-[hsl(var(--timer-dark))] w-full max-w-[260px] mr-4">
+              {/* Header - Bell notification */}
+              <div className="self-end flex items-center gap-1">
+                <span className="text-xs font-medium">new</span>
+                <div className="relative">
                   <Bell className="w-4 h-4" />
-                  <span className="absolute -top-1 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </div>
               </div>
 
               {/* Timer Display */}
-              <div className="text-6xl font-bold my-4">
+              <div className="text-[68px] font-bold leading-none">
                 {formatTime(time)}
               </div>
 
               {/* Category */}
-              <div className="text-base font-semibold mb-2">
+              <div className="text-lg font-semibold">
                 Marketing / Meetings
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4 mb-4">
+              <div className="flex gap-3">
                 {!isActive ? (
                   <>
                     <Button
                       onClick={handleStart}
-                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2 rounded-lg text-sm shadow-none border-0"
+                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2.5 rounded-lg text-sm shadow-none border-0"
                     >
                       START
                     </Button>
                     <Button
-                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2 rounded-lg text-sm shadow-none"
+                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2.5 rounded-lg text-sm shadow-none"
                     >
                       TASKS
                     </Button>
@@ -142,13 +151,13 @@ export const StickyTimer = () => {
                 ) : (
                   <>
                     <Button
-                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2 rounded-lg text-sm shadow-none border-0"
+                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2.5 rounded-lg text-sm shadow-none"
                     >
                       BPM
                     </Button>
                     <Button
                       onClick={handleStop}
-                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2 rounded-lg text-sm shadow-none"
+                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2.5 rounded-lg text-sm shadow-none border-0"
                     >
                       STOP
                     </Button>
@@ -157,7 +166,7 @@ export const StickyTimer = () => {
               </div>
 
               {/* Next Meeting */}
-              <div className="text-sm text-center opacity-80">
+              <div className="text-sm text-center opacity-70 mt-2">
                 <div className="mb-1">Meeting in</div>
                 <div className="font-bold text-base">13 min</div>
               </div>
