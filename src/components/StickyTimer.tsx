@@ -13,14 +13,57 @@ export const StickyTimer = () => {
   const [side, setSide] = useState<'left' | 'right'>('right');
   const [isInMeeting, setIsInMeeting] = useState(false);
   const [hasNewNotifications, setHasNewNotifications] = useState(false);
-  const [userSetPosition, setUserSetPosition] = useState(false); // Track if user manually positioned it
+  const [userSetPosition, setUserSetPosition] = useState(false);
+  const [nextMeetingTime, setNextMeetingTime] = useState<Date | null>(null);
+  const [showMeetingInput, setShowMeetingInput] = useState(false);
+  const [meetingTimeInput, setMeetingTimeInput] = useState("");
   const [position, setPosition] = useState(() => ({
     x: window.innerWidth - 215,
-    y: 50, // Start at top
+    y: 50,
   }));
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const timerRef = useRef<HTMLDivElement>(null);
+
+  // Calculate time until meeting
+  const getTimeUntilMeeting = () => {
+    if (!nextMeetingTime) return "No meeting";
+    
+    const now = new Date();
+    const diff = nextMeetingTime.getTime() - now.getTime();
+    
+    if (diff < 0) return "Meeting started";
+    
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return `${minutes} min`;
+    
+    const hours = Math.floor(minutes / 60);
+    const remainingMins = minutes % 60;
+    return `${hours}h ${remainingMins}m`;
+  };
+
+  const handleSetMeetingTime = () => {
+    if (meetingTimeInput) {
+      const meetingDate = new Date(meetingTimeInput);
+      setNextMeetingTime(meetingDate);
+      localStorage.setItem('nextMeetingTime', meetingDate.toISOString());
+      setShowMeetingInput(false);
+      setMeetingTimeInput("");
+    }
+  };
+
+  // Load saved meeting time on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('nextMeetingTime');
+    if (saved) {
+      const meetingDate = new Date(saved);
+      if (meetingDate > new Date()) {
+        setNextMeetingTime(meetingDate);
+      } else {
+        localStorage.removeItem('nextMeetingTime');
+      }
+    }
+  }, []);
 
   // Check for new notifications
   useEffect(() => {
@@ -186,8 +229,16 @@ export const StickyTimer = () => {
             </div>
             
             <div className="text-xs text-center opacity-80">
-              <div className="mb-1">Meeting in</div>
-              <div className="font-semibold">13 min</div>
+              <div 
+                className="mb-1 cursor-pointer hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMeetingInput(true);
+                }}
+              >
+                Meeting in
+              </div>
+              <div className="font-semibold">{getTimeUntilMeeting()}</div>
             </div>
           </div>
         </div>
@@ -342,9 +393,71 @@ export const StickyTimer = () => {
               </div>
 
               <div className="text-center opacity-70">
-                <div className="mb-0.5" style={{ fontSize: "9px" }}>Meeting in</div>
-                <div className="font-bold" style={{ fontSize: "10px" }}>13 min</div>
+                <div 
+                  className="mb-0.5 cursor-pointer hover:opacity-100 transition-opacity"
+                  style={{ fontSize: "9px" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMeetingInput(true);
+                  }}
+                >
+                  Meeting in
+                </div>
+                <div className="font-bold" style={{ fontSize: "10px" }}>
+                  {getTimeUntilMeeting()}
+                </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Meeting Time Input Dialog */}
+      {showMeetingInput && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]"
+          onClick={() => setShowMeetingInput(false)}
+        >
+          <div 
+            className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+            style={{ color: "#434343" }}
+          >
+            <h3 className="text-lg font-bold mb-4">Set Next Meeting</h3>
+            <input
+              type="datetime-local"
+              value={meetingTimeInput}
+              onChange={(e) => setMeetingTimeInput(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md mb-4"
+              style={{ fontSize: "14px" }}
+            />
+            <div className="flex gap-3">
+              <Button
+                onClick={handleSetMeetingTime}
+                className="flex-1 font-bold shadow-none border-0"
+                style={{
+                  backgroundColor: "#063A39",
+                  color: "white",
+                  fontSize: "12px",
+                  padding: "8px",
+                  borderRadius: "6px",
+                }}
+              >
+                Set Time
+              </Button>
+              <Button
+                onClick={() => setShowMeetingInput(false)}
+                className="flex-1 bg-transparent font-bold shadow-none"
+                style={{
+                  border: "1px solid #063A39",
+                  color: "#063A39",
+                  fontSize: "12px",
+                  padding: "8px",
+                  borderRadius: "6px",
+                }}
+              >
+                Cancel
+              </Button>
             </div>
           </div>
         </div>
