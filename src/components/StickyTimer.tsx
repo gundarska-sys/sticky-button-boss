@@ -114,8 +114,16 @@ export const StickyTimer = () => {
           <div className="absolute inset-0 flex flex-col items-center justify-between py-6 px-3 text-[hsl(var(--timer-dark))]">
             <div className="relative flex items-center gap-1">
               <span className="text-xs font-medium">new</span>
-              <Bell className="w-4 h-4" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              <div 
+                className="relative cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open('https://bpm.zoomcharts.com:9000/#/app/notifications', '_blank');
+                }}
+              >
+                <Bell className="w-4 h-4" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </div>
             </div>
             
             <div className="flex flex-col items-center gap-2">
@@ -160,7 +168,13 @@ export const StickyTimer = () => {
             <div className="flex flex-col items-center gap-3 w-full max-w-[160px]" style={{ color: "#434343" }}>
               <div className="self-end flex items-center gap-1 mb-1">
                 <span className="font-medium" style={{ fontSize: "12.48px" }}>new</span>
-                <div className="relative">
+                <div 
+                  className="relative cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open('https://bpm.zoomcharts.com:9000/#/app/notifications', '_blank');
+                  }}
+                >
                   <Bell className="w-3.5 h-3.5" />
                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
                 </div>
