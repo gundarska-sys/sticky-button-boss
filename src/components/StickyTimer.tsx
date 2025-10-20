@@ -11,13 +11,45 @@ export const StickyTimer = () => {
   const [isActive, setIsActive] = useState(false);
   const [time, setTime] = useState(0);
   const [side, setSide] = useState<'left' | 'right'>('right');
+  const [isInMeeting, setIsInMeeting] = useState(false);
   const [position, setPosition] = useState(() => ({
     x: window.innerWidth - 215,
-    y: (window.innerHeight - 487) / 2,
+    y: 50, // Start at top
   }));
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const timerRef = useRef<HTMLDivElement>(null);
+
+  // Check if in Teams meeting
+  useEffect(() => {
+    const checkTeamsMeeting = () => {
+      // Check if running in Teams context or if window title contains "Meeting"
+      const inTeams = window.location.href.includes('teams.microsoft.com') || 
+                      document.title.toLowerCase().includes('meeting') ||
+                      document.title.toLowerCase().includes('teams');
+      setIsInMeeting(inTeams);
+      
+      // Update position based on meeting status
+      if (inTeams) {
+        setPosition(prev => ({
+          ...prev,
+          y: window.innerHeight - 487 - 50, // Bottom position
+        }));
+      } else {
+        setPosition(prev => ({
+          ...prev,
+          y: 50, // Top position
+        }));
+      }
+    };
+
+    checkTeamsMeeting();
+    
+    // Check periodically for title changes
+    const interval = setInterval(checkTeamsMeeting, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
