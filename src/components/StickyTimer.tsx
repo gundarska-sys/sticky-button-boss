@@ -10,6 +10,7 @@ export const StickyTimer = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [time, setTime] = useState(0);
+  const [side, setSide] = useState<'left' | 'right'>('right');
   const [position, setPosition] = useState(() => ({
     x: window.innerWidth - 61,
     y: (window.innerHeight - 252) / 2,
@@ -31,10 +32,15 @@ export const StickyTimer = () => {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
+        const newY = e.clientY - dragOffset.y;
+        const midScreen = window.innerWidth / 2;
+        const newSide = e.clientX < midScreen ? 'left' : 'right';
+        
         setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
+          x: newSide === 'right' ? window.innerWidth - 61 : 0,
+          y: Math.max(0, Math.min(newY, window.innerHeight - 252)),
         });
+        setSide(newSide);
       }
     };
 
@@ -128,14 +134,34 @@ export const StickyTimer = () => {
 
       {/* Expanded State - Droplet */}
       {isExpanded && (
-        <div className="relative animate-bounce-in" style={{ width: "215px", height: "487px", marginLeft: "-154px" }}>
+        <div 
+          className="relative animate-bounce-in" 
+          style={{ 
+            width: "215px", 
+            height: "487px", 
+            marginLeft: side === 'right' ? "-154px" : "0",
+            marginRight: side === 'left' ? "-154px" : "0",
+            transform: side === 'left' ? 'scaleX(-1)' : 'none'
+          }}
+        >
           <img
             src={isActive ? dropletGreen : dropletOrange}
             alt="Timer droplet"
-            className="absolute top-0 right-0 w-full h-full transition-all duration-300"
+            className="absolute top-0 w-full h-full transition-all duration-300"
+            style={{ 
+              left: side === 'right' ? '0' : 'auto',
+              right: side === 'left' ? '0' : 'auto'
+            }}
           />
           
-          <div className="absolute inset-0 flex items-center justify-center pr-6">
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ 
+              paddingRight: side === 'right' ? '24px' : '0',
+              paddingLeft: side === 'left' ? '24px' : '0',
+              transform: side === 'left' ? 'scaleX(-1)' : 'none'
+            }}
+          >
             <div className="flex flex-col items-center gap-3 w-full max-w-[160px]" style={{ color: "#434343" }}>
               <div className="self-end flex items-center gap-1 mb-1">
                 <span className="font-medium" style={{ fontSize: "12.48px" }}>new</span>
