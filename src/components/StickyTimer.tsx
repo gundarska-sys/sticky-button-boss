@@ -39,17 +39,18 @@ export const StickyTimer = () => {
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
-      {/* Collapsed State */}
+      {/* Collapsed State - Simple Pill */}
       {!isExpanded && (
         <div
-          className="relative bg-[hsl(var(--timer-green))] text-[hsl(var(--timer-dark))] shadow-2xl transition-all duration-300"
+          className="relative shadow-2xl transition-all duration-300 overflow-hidden"
           style={{
             width: "80px",
             height: "280px",
             borderRadius: "40px 0 0 40px",
+            backgroundColor: isActive ? "hsl(var(--timer-green))" : "hsl(var(--timer-green))",
           }}
         >
-          <div className="flex flex-col items-center justify-between h-full py-6 px-3">
+          <div className="flex flex-col items-center justify-between h-full py-6 px-3 text-[hsl(var(--timer-dark))]">
             <div className="relative flex items-center gap-1">
               <span className="text-xs font-medium">new</span>
               <Bell className="w-4 h-4" />
@@ -58,7 +59,7 @@ export const StickyTimer = () => {
             
             <div className="flex flex-col items-center gap-2">
               <div className="text-xs font-medium">
-                {isActive ? "Active" : "Ready"}
+                {isActive ? "Active" : "Active"}
               </div>
               <div className="text-sm font-bold whitespace-nowrap">
                 {formatTime(time)}
@@ -73,30 +74,37 @@ export const StickyTimer = () => {
         </div>
       )}
 
-      {/* Expanded State */}
+      {/* Expanded State - Droplet Shape */}
       {isExpanded && (
-        <div className="relative animate-bounce-in">
+        <div className="relative animate-bounce-in" style={{ width: "380px", height: "550px" }}>
+          {/* Droplet SVG Background */}
           <svg
-            width="400"
-            height="600"
-            viewBox="0 0 400 600"
-            className="absolute top-1/2 right-0 -translate-y-1/2"
+            width="380"
+            height="550"
+            viewBox="0 0 380 550"
+            className="absolute top-0 right-0"
             style={{ pointerEvents: "none" }}
           >
+            <defs>
+              <clipPath id="droplet-clip">
+                <path d="M 380 50 C 380 50, 380 100, 350 150 C 320 200, 280 230, 200 280 C 120 330, 60 360, 30 410 C 10 445, 0 470, 0 470 L 0 130 C 0 130, 10 105, 30 140 C 60 190, 120 220, 200 270 C 280 320, 320 350, 350 400 C 380 450, 380 500, 380 500 Z" />
+              </clipPath>
+            </defs>
             <path
-              d="M 400 0 C 350 0, 320 20, 300 60 C 280 100, 260 140, 220 180 C 180 220, 140 240, 100 270 C 60 300, 20 330, 0 370 L 0 230 C 20 270, 60 300, 100 330 C 140 360, 180 380, 220 420 C 260 460, 280 500, 300 540 C 320 580, 350 600, 400 600 Z"
+              d="M 380 50 C 380 50, 380 100, 350 150 C 320 200, 280 230, 200 280 C 120 330, 60 360, 30 410 C 10 445, 0 470, 0 470 L 0 130 C 0 130, 10 105, 30 140 C 60 190, 120 220, 200 270 C 280 320, 320 350, 350 400 C 380 450, 380 500, 380 500 Z"
               fill={isActive ? "hsl(var(--timer-green))" : "hsl(var(--timer-orange))"}
               className="transition-all duration-300"
             />
           </svg>
           
+          {/* Content Inside Droplet */}
           <div
-            className="relative z-10 pr-12 pl-8 py-12"
-            style={{ width: "340px", minHeight: "600px" }}
+            className="absolute inset-0 flex flex-col items-center justify-center px-8"
+            style={{ clipPath: "url(#droplet-clip)" }}
           >
-            <div className="flex flex-col items-center justify-center h-full gap-6">
+            <div className="flex flex-col items-center gap-6 text-[hsl(var(--timer-dark))] w-full max-w-[280px]">
               {/* Header */}
-              <div className="flex items-center justify-between w-full px-4">
+              <div className="flex items-center justify-between w-full">
                 <ChevronLeft className="w-5 h-5 opacity-60" />
                 <div className="relative flex items-center gap-1">
                   <span className="text-xs font-medium">new</span>
@@ -106,27 +114,27 @@ export const StickyTimer = () => {
               </div>
 
               {/* Timer Display */}
-              <div className="text-6xl font-bold my-6" style={{ color: "hsl(var(--timer-dark))" }}>
+              <div className="text-6xl font-bold my-4">
                 {formatTime(time)}
               </div>
 
               {/* Category */}
-              <div className="text-base font-semibold mb-4" style={{ color: "hsl(var(--timer-dark))" }}>
+              <div className="text-base font-semibold mb-2">
                 Marketing / Meetings
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4 mb-6">
+              <div className="flex gap-4 mb-4">
                 {!isActive ? (
                   <>
                     <Button
                       onClick={handleStart}
-                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2 rounded-lg text-sm"
+                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2 rounded-lg text-sm shadow-none border-0"
                     >
                       START
                     </Button>
                     <Button
-                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2 rounded-lg text-sm"
+                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2 rounded-lg text-sm shadow-none"
                     >
                       TASKS
                     </Button>
@@ -134,13 +142,13 @@ export const StickyTimer = () => {
                 ) : (
                   <>
                     <Button
-                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2 rounded-lg text-sm"
+                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-8 py-2 rounded-lg text-sm shadow-none border-0"
                     >
                       BPM
                     </Button>
                     <Button
                       onClick={handleStop}
-                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2 rounded-lg text-sm"
+                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-8 py-2 rounded-lg text-sm shadow-none"
                     >
                       STOP
                     </Button>
@@ -149,7 +157,7 @@ export const StickyTimer = () => {
               </div>
 
               {/* Next Meeting */}
-              <div className="text-sm text-center" style={{ color: "hsl(var(--timer-dark))", opacity: 0.8 }}>
+              <div className="text-sm text-center opacity-80">
                 <div className="mb-1">Meeting in</div>
                 <div className="font-bold text-base">13 min</div>
               </div>
