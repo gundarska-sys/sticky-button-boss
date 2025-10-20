@@ -47,7 +47,7 @@ export const StickyTimer = () => {
       {!isExpanded && (
         <div className="relative" style={{ width: "61px", height: "252px" }}>
           <img
-            src={isActive ? pillGreen : pillGreen}
+            src={isActive ? pillGreen : pillOrange}
             alt="Timer pill"
             className="absolute top-0 right-0 w-full h-full transition-all duration-300"
           />
@@ -60,10 +60,12 @@ export const StickyTimer = () => {
             </div>
             
             <div className="flex flex-col items-center gap-2">
-              <div className="text-xs font-medium">Active</div>
-              <div className="text-sm font-bold whitespace-nowrap">
-                {formatTime(time)}
-              </div>
+              <div className="text-xs font-medium">{isActive ? "Active" : "START"}</div>
+              {isActive && (
+                <div className="text-sm font-bold whitespace-nowrap">
+                  {formatTime(time)}
+                </div>
+              )}
             </div>
             
             <div className="text-xs text-center opacity-80">
