@@ -83,7 +83,7 @@ export const StickyTimer = () => {
   return (
     <div
       ref={timerRef}
-      className="fixed z-50"
+      className="fixed z-[9999]"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -128,7 +128,7 @@ export const StickyTimer = () => {
 
       {/* Expanded State - Droplet */}
       {isExpanded && (
-        <div className="relative animate-bounce-in" style={{ width: "215px", height: "487px" }}>
+        <div className="relative animate-bounce-in" style={{ width: "215px", height: "487px", marginLeft: "-154px" }}>
           <img
             src={isActive ? dropletGreen : dropletOrange}
             alt="Timer droplet"
