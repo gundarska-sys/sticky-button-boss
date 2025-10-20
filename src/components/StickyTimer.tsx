@@ -209,6 +209,10 @@ export const StickyTimer = () => {
                       START
                     </Button>
                     <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open('https://bpm.zoomcharts.com:9000/#/app/my-tasks', '_blank');
+                      }}
                       className="bg-transparent font-bold shadow-none transition-colors"
                       style={{
                         border: "0.83px solid #063A39",
@@ -236,6 +240,10 @@ export const StickyTimer = () => {
                 ) : (
                   <>
                     <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open('https://bpm.zoomcharts.com:9000/#/app/apps', '_blank');
+                      }}
                       className="bg-transparent font-bold shadow-none transition-colors"
                       style={{
                         border: "0.83px solid #063A39",
