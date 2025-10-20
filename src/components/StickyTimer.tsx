@@ -135,13 +135,14 @@ export const StickyTimer = () => {
       {/* Expanded State - Droplet */}
       {isExpanded && (
         <div 
-          className="relative animate-bounce-in" 
+          className="absolute animate-bounce-in" 
           style={{ 
             width: "215px", 
-            height: "487px", 
-            marginLeft: side === 'right' ? "-154px" : "0",
-            marginRight: side === 'left' ? "-154px" : "0",
-            transform: side === 'left' ? 'scaleX(-1)' : 'none'
+            height: "487px",
+            top: "50%",
+            transform: `translateY(-50%) ${side === 'left' ? 'scaleX(-1)' : ''}`,
+            left: side === 'right' ? '-154px' : 'auto',
+            right: side === 'left' ? '-154px' : 'auto',
           }}
         >
           <img
@@ -149,8 +150,7 @@ export const StickyTimer = () => {
             alt="Timer droplet"
             className="absolute top-0 w-full h-full transition-all duration-300"
             style={{ 
-              left: side === 'right' ? '0' : 'auto',
-              right: side === 'left' ? '0' : 'auto'
+              left: '0',
             }}
           />
           
