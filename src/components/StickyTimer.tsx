@@ -83,35 +83,35 @@ export const StickyTimer = () => {
             className="absolute top-0 right-0 w-full h-full transition-all duration-300"
           />
           
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4 text-[hsl(var(--timer-dark))] w-full max-w-[180px] pr-8">
-              <div className="self-end flex items-center gap-1">
-                <span className="text-xs font-medium">new</span>
+          <div className="absolute inset-0 flex items-center justify-center pr-6">
+            <div className="flex flex-col items-center gap-3 text-[hsl(var(--timer-dark))] w-full max-w-[160px]">
+              <div className="self-end flex items-center gap-1 mb-1">
+                <span className="text-[10px] font-medium">new</span>
                 <div className="relative">
-                  <Bell className="w-4 h-4" />
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                  <Bell className="w-3.5 h-3.5" />
+                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
                 </div>
               </div>
 
-              <div className="text-5xl font-bold leading-none">
+              <div className="text-[42px] font-bold leading-none">
                 {formatTime(time)}
               </div>
 
-              <div className="text-base font-semibold text-center">
+              <div className="text-sm font-semibold text-center -mt-1">
                 Marketing / Meetings
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2.5">
                 {!isActive ? (
                   <>
                     <Button
                       onClick={handleStart}
-                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-6 py-2 rounded-lg text-xs shadow-none border-0"
+                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-5 py-1.5 rounded-md text-[11px] shadow-none border-0 h-8"
                     >
                       START
                     </Button>
                     <Button
-                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-6 py-2 rounded-lg text-xs shadow-none"
+                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-5 py-1.5 rounded-md text-[11px] shadow-none h-8"
                     >
                       TASKS
                     </Button>
@@ -119,13 +119,13 @@ export const StickyTimer = () => {
                 ) : (
                   <>
                     <Button
-                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-6 py-2 rounded-lg text-xs shadow-none"
+                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-5 py-1.5 rounded-md text-[11px] shadow-none h-8"
                     >
                       BPM
                     </Button>
                     <Button
                       onClick={handleStop}
-                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-6 py-2 rounded-lg text-xs shadow-none border-0"
+                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-5 py-1.5 rounded-md text-[11px] shadow-none border-0 h-8"
                     >
                       STOP
                     </Button>
@@ -133,8 +133,8 @@ export const StickyTimer = () => {
                 )}
               </div>
 
-              <div className="text-xs text-center opacity-70 mt-1">
-                <div className="mb-1">Meeting in</div>
+              <div className="text-[11px] text-center opacity-70">
+                <div className="mb-0.5">Meeting in</div>
                 <div className="font-bold text-sm">13 min</div>
               </div>
             </div>
