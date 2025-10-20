@@ -106,7 +106,7 @@ export const StickyTimer = () => {
                   <>
                     <Button
                       onClick={handleStart}
-                      className="font-bold shadow-none border-0"
+                      className="font-bold shadow-none border-0 transition-colors"
                       style={{
                         backgroundColor: "#063A39",
                         color: "white",
@@ -116,11 +116,13 @@ export const StickyTimer = () => {
                         borderRadius: "3px",
                         padding: "0",
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6B6B6B"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#063A39"}
                     >
                       START
                     </Button>
                     <Button
-                      className="bg-transparent font-bold shadow-none"
+                      className="bg-transparent font-bold shadow-none transition-colors"
                       style={{
                         border: "2px solid #063A39",
                         color: "#063A39",
@@ -129,6 +131,16 @@ export const StickyTimer = () => {
                         height: "18.31px",
                         borderRadius: "3px",
                         padding: "0",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#3D3D3D";
+                        e.currentTarget.style.color = "white";
+                        e.currentTarget.style.borderColor = "#3D3D3D";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                        e.currentTarget.style.color = "#063A39";
+                        e.currentTarget.style.borderColor = "#063A39";
                       }}
                     >
                       TASKS
@@ -137,7 +149,7 @@ export const StickyTimer = () => {
                 ) : (
                   <>
                     <Button
-                      className="bg-transparent font-bold shadow-none"
+                      className="bg-transparent font-bold shadow-none transition-colors"
                       style={{
                         border: "2px solid #063A39",
                         color: "#063A39",
@@ -147,12 +159,22 @@ export const StickyTimer = () => {
                         borderRadius: "3px",
                         padding: "0",
                       }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#3D3D3D";
+                        e.currentTarget.style.color = "white";
+                        e.currentTarget.style.borderColor = "#3D3D3D";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                        e.currentTarget.style.color = "#063A39";
+                        e.currentTarget.style.borderColor = "#063A39";
+                      }}
                     >
                       BPM
                     </Button>
                     <Button
                       onClick={handleStop}
-                      className="font-bold shadow-none border-0"
+                      className="font-bold shadow-none border-0 transition-colors"
                       style={{
                         backgroundColor: "#063A39",
                         color: "white",
@@ -162,6 +184,8 @@ export const StickyTimer = () => {
                         borderRadius: "3px",
                         padding: "0",
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6B6B6B"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#063A39"}
                     >
                       STOP
                     </Button>
