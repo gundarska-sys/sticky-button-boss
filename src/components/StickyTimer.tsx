@@ -10,7 +10,10 @@ export const StickyTimer = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [time, setTime] = useState(0);
-  const [position, setPosition] = useState({ x: window.innerWidth - 61, y: window.innerHeight / 2 - 126 });
+  const [position, setPosition] = useState(() => ({
+    x: window.innerWidth - 61,
+    y: (window.innerHeight - 252) / 2,
+  }));
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const timerRef = useRef<HTMLDivElement>(null);
@@ -80,7 +83,7 @@ export const StickyTimer = () => {
   return (
     <div
       ref={timerRef}
-      className="fixed z-50 transition-all duration-100"
+      className="fixed z-50"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
