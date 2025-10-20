@@ -12,8 +12,8 @@ export const StickyTimer = () => {
   const [time, setTime] = useState(0);
   const [side, setSide] = useState<'left' | 'right'>('right');
   const [position, setPosition] = useState(() => ({
-    x: window.innerWidth - 61,
-    y: (window.innerHeight - 252) / 2,
+    x: window.innerWidth - 215,
+    y: (window.innerHeight - 487) / 2,
   }));
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -37,8 +37,8 @@ export const StickyTimer = () => {
         const newSide = e.clientX < midScreen ? 'left' : 'right';
         
         setPosition({
-          x: newSide === 'right' ? window.innerWidth - 61 : 0,
-          y: Math.max(0, Math.min(newY, window.innerHeight - 252)),
+          x: newSide === 'right' ? window.innerWidth - 215 : 0,
+          y: Math.max(0, Math.min(newY, window.innerHeight - 487)),
         });
         setSide(newSide);
       }
@@ -94,8 +94,8 @@ export const StickyTimer = () => {
         left: `${position.x}px`,
         top: `${position.y}px`,
         cursor: isDragging ? "grabbing" : "grab",
-        width: "61px",
-        height: "252px",
+        width: "215px",
+        height: "487px",
       }}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => !isDragging && setIsExpanded(false)}
@@ -103,11 +103,12 @@ export const StickyTimer = () => {
     >
       {/* Collapsed State */}
       {!isExpanded && (
-        <div className="relative" style={{ width: "61px", height: "252px" }}>
+        <div className="absolute" style={{ width: "61px", height: "252px", top: "50%", transform: "translateY(-50%)", right: side === 'right' ? '0' : 'auto', left: side === 'left' ? '0' : 'auto' }}>
           <img
             src={isActive ? pillGreen : pillOrange}
             alt="Timer pill"
-            className="absolute top-0 right-0 w-full h-full transition-all duration-300"
+            className="absolute top-0 w-full h-full transition-all duration-300"
+            style={{ left: 0, transform: side === 'left' ? 'scaleX(-1)' : 'none' }}
           />
           
           <div className="absolute inset-0 flex flex-col items-center justify-between py-6 px-3 text-[hsl(var(--timer-dark))]">
@@ -137,21 +138,15 @@ export const StickyTimer = () => {
       {/* Expanded State - Droplet */}
       {isExpanded && (
         <div 
-          className="absolute animate-bounce-in" 
+          className="absolute inset-0 animate-bounce-in" 
           style={{ 
-            width: "215px", 
-            height: "487px",
-            top: "50%",
-            transform: `translateY(-50%) ${side === 'left' ? 'scaleX(-1)' : ''}`,
-            left: side === 'right' ? '-154px' : '61px',
-            right: side === 'left' ? '0' : 'auto',
-            pointerEvents: 'auto',
+            transform: side === 'left' ? 'scaleX(-1)' : 'none'
           }}
         >
           <img
             src={isActive ? dropletGreen : dropletOrange}
             alt="Timer droplet"
-            className="w-full h-full transition-all duration-300"
+            className="absolute inset-0 w-full h-full transition-all duration-300"
           />
           
           <div 
