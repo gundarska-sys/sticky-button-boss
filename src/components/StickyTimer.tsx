@@ -12,6 +12,7 @@ export const StickyTimer = () => {
   const [time, setTime] = useState(0);
   const [side, setSide] = useState<'left' | 'right'>('right');
   const [isInMeeting, setIsInMeeting] = useState(false);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
   const [position, setPosition] = useState(() => ({
     x: window.innerWidth - 215,
     y: 50, // Start at top
@@ -19,6 +20,21 @@ export const StickyTimer = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const timerRef = useRef<HTMLDivElement>(null);
+
+  // Check for new notifications
+  useEffect(() => {
+    const checkNotifications = async () => {
+      // TODO: Replace with actual API call to check notifications
+      // For now, this is a placeholder that can be triggered by external events
+      // Example: const response = await fetch('https://bpm.zoomcharts.com:9000/api/notifications/unread');
+      // setHasNewNotifications(response.hasUnread);
+    };
+
+    checkNotifications();
+    const interval = setInterval(checkNotifications, 30000); // Check every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Check if in Teams meeting
   useEffect(() => {
@@ -145,16 +161,19 @@ export const StickyTimer = () => {
           
           <div className="absolute inset-0 flex flex-col items-center justify-between py-6 px-3 text-[hsl(var(--timer-dark))]">
             <div className="relative flex items-center gap-1">
-              <span className="text-xs font-medium">new</span>
+              {hasNewNotifications && <span className="text-xs font-medium">new</span>}
               <div 
                 className="relative cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={(e) => {
                   e.stopPropagation();
+                  setHasNewNotifications(false); // Mark as read when clicked
                   window.open('https://bpm.zoomcharts.com:9000/#/app/notifications', '_blank');
                 }}
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                {hasNewNotifications && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
               </div>
             </div>
             
@@ -199,16 +218,19 @@ export const StickyTimer = () => {
           >
             <div className="flex flex-col items-center gap-3 w-full max-w-[160px]" style={{ color: "#434343" }}>
               <div className="self-end flex items-center gap-1 mb-1">
-                <span className="font-medium" style={{ fontSize: "12.48px" }}>new</span>
+                {hasNewNotifications && <span className="font-medium" style={{ fontSize: "12.48px" }}>new</span>}
                 <div 
                   className="relative cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={(e) => {
                     e.stopPropagation();
+                    setHasNewNotifications(false); // Mark as read when clicked
                     window.open('https://bpm.zoomcharts.com:9000/#/app/notifications', '_blank');
                   }}
                 >
                   <Bell className="w-3.5 h-3.5" />
-                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                  {hasNewNotifications && (
+                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                  )}
                 </div>
               </div>
 
