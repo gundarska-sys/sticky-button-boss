@@ -84,20 +84,20 @@ export const StickyTimer = () => {
           />
           
           <div className="absolute inset-0 flex items-center justify-center pr-6">
-            <div className="flex flex-col items-center gap-3 text-[hsl(var(--timer-dark))] w-full max-w-[160px]">
+            <div className="flex flex-col items-center gap-3 w-full max-w-[160px]" style={{ color: "#434343" }}>
               <div className="self-end flex items-center gap-1 mb-1">
-                <span className="text-[10px] font-medium">new</span>
+                <span className="font-medium" style={{ fontSize: "12.48px" }}>new</span>
                 <div className="relative">
                   <Bell className="w-3.5 h-3.5" />
                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
                 </div>
               </div>
 
-              <div className="text-[42px] font-bold leading-none">
+              <div className="font-bold leading-none" style={{ fontSize: "24.97px" }}>
                 {formatTime(time)}
               </div>
 
-              <div className="text-sm font-semibold text-center -mt-1">
+              <div className="font-semibold text-center -mt-1" style={{ fontSize: "12.48px" }}>
                 Marketing / Meetings
               </div>
 
@@ -106,12 +106,30 @@ export const StickyTimer = () => {
                   <>
                     <Button
                       onClick={handleStart}
-                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-5 py-1.5 rounded-md text-[11px] shadow-none border-0 h-8"
+                      className="font-bold shadow-none border-0"
+                      style={{
+                        backgroundColor: "#063A39",
+                        color: "white",
+                        fontSize: "9.99px",
+                        width: "54.93px",
+                        height: "18.31px",
+                        borderRadius: "3px",
+                        padding: "0",
+                      }}
                     >
                       START
                     </Button>
                     <Button
-                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-5 py-1.5 rounded-md text-[11px] shadow-none h-8"
+                      className="bg-transparent font-bold shadow-none"
+                      style={{
+                        border: "2px solid #063A39",
+                        color: "#063A39",
+                        fontSize: "9.99px",
+                        width: "54.93px",
+                        height: "18.31px",
+                        borderRadius: "3px",
+                        padding: "0",
+                      }}
                     >
                       TASKS
                     </Button>
@@ -119,13 +137,31 @@ export const StickyTimer = () => {
                 ) : (
                   <>
                     <Button
-                      className="bg-transparent border-2 border-[hsl(var(--timer-dark))] text-[hsl(var(--timer-dark))] hover:bg-[hsl(var(--timer-dark))]/10 font-bold px-5 py-1.5 rounded-md text-[11px] shadow-none h-8"
+                      className="bg-transparent font-bold shadow-none"
+                      style={{
+                        border: "2px solid #063A39",
+                        color: "#063A39",
+                        fontSize: "9.99px",
+                        width: "54.93px",
+                        height: "18.31px",
+                        borderRadius: "3px",
+                        padding: "0",
+                      }}
                     >
                       BPM
                     </Button>
                     <Button
                       onClick={handleStop}
-                      className="bg-[hsl(var(--timer-dark))] text-white hover:bg-[hsl(var(--timer-dark))]/90 font-bold px-5 py-1.5 rounded-md text-[11px] shadow-none border-0 h-8"
+                      className="font-bold shadow-none border-0"
+                      style={{
+                        backgroundColor: "#063A39",
+                        color: "white",
+                        fontSize: "9.99px",
+                        width: "54.93px",
+                        height: "18.31px",
+                        borderRadius: "3px",
+                        padding: "0",
+                      }}
                     >
                       STOP
                     </Button>
@@ -133,9 +169,9 @@ export const StickyTimer = () => {
                 )}
               </div>
 
-              <div className="text-[11px] text-center opacity-70">
-                <div className="mb-0.5">Meeting in</div>
-                <div className="font-bold text-sm">13 min</div>
+              <div className="text-center opacity-70">
+                <div className="mb-0.5" style={{ fontSize: "9px" }}>Meeting in</div>
+                <div className="font-bold" style={{ fontSize: "10px" }}>13 min</div>
               </div>
             </div>
           </div>

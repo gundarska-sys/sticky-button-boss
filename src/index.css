@@ -41,6 +41,8 @@ All colors MUST be HSL.
     --timer-green: 142 70% 65%;
     --timer-orange: 32 95% 64%;
     --timer-dark: 0 0% 15%;
+    --timer-text: 0 0% 26%;
+    --timer-button: 180 88% 12%;
 
     --sidebar-background: 0 0% 98%;
 
