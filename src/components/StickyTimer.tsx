@@ -124,7 +124,7 @@ export const StickyTimer = () => {
                     <Button
                       className="bg-transparent font-bold shadow-none transition-colors"
                       style={{
-                        border: "2px solid #063A39",
+                        border: "0.83px solid #063A39",
                         color: "#063A39",
                         fontSize: "9.99px",
                         width: "54.93px",
@@ -151,7 +151,7 @@ export const StickyTimer = () => {
                     <Button
                       className="bg-transparent font-bold shadow-none transition-colors"
                       style={{
-                        border: "2px solid #063A39",
+                        border: "0.83px solid #063A39",
                         color: "#063A39",
                         fontSize: "9.99px",
                         width: "54.93px",
