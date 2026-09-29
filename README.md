@@ -1,73 +1,42 @@
-# Welcome to your Lovable project
+# ZoomCharts BPM Quick Timer
 
-## Project info
+Always-on-top Windows edge widget for the ZoomCharts BPM timer (Electron).
 
-**URL**: https://lovable.dev/projects/6b08bcaa-fdf2-46e1-b685-96439b626841
+## Windows developer commands
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/6b08bcaa-fdf2-46e1-b685-96439b626841) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```powershell
+npm install
+npm run desktop:dev     # Vite on http://localhost:8080 + Electron window
+npm run desktop:build   # vite build + electron-builder --win nsis
 ```
 
-**Edit a file directly in GitHub**
+The NSIS installer appears in `release\ZoomCharts BPM Quick Timer Setup <version>.exe`
+(per-user install, Start Menu + Desktop shortcut). `npm run desktop:pack` builds an unpacked
+app in `release\win-unpacked\` for quick testing. `npm run build` is the plain web build.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Icon: `public/favicon.ico` is a temporary icon. Replace it with a 256x256 `build/icon.ico`
+and set `build.win.icon` in `package.json` to `build/icon.ico`. Unsigned builds trigger
+SmartScreen until code-signed.
 
-**Use GitHub Codespaces**
+## Features
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- 215x487 frameless, transparent, always-on-top widget; snaps to left/right screen edge, remembers position.
+- Tray: Show/Hide, Open BPM, Log in to BPM, Launch at Windows startup, Quit. Closing hides; single instance.
+- Login uses the real BPM page (`/login`) in a window with a persistent `persist:bpm` session.
+  Cookies never reach the widget UI; no credentials are stored by the app.
 
-## What technologies are used for this project?
+## Finishing the BPM adapter (remaining step)
 
-This project is built with:
+The BPM app code is only served after login, so the private timer API could not be verified.
+Until it is filled in, the widget shows "BPM timer sync setup needed" and START stays disabled.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/6b08bcaa-fdf2-46e1-b685-96439b626841) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+1. Log in to https://bpm.zoomcharts.com:9000 in Chrome, open DevTools -> Network (Fetch/XHR).
+2. Capture these four requests (method, path, request body, response JSON, any CSRF header):
+   - page load / My Tasks: the request returning **the currently running timer**
+   - My Tasks: the request returning **your active tasks/projects**
+   - press Start on a task: the request that **starts the timer**
+   - press Stop: the request that **stops/commits the timer**
+3. Put method + path in `electron/bpm-contract.cjs` (`BPM_ENDPOINTS`).
+4. In `electron/bpm-client.cjs`, map responses to `{ id, projectId, projectName, startedAt }`
+   (timer) and `{ id, name, projectName }` (task), and build the start/stop bodies.
+   Add a CSRF header in `request()` if BPM requires one.

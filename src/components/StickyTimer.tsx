@@ -1,465 +1,299 @@
-import { useState, useEffect, useRef } from "react";
-import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import dropletGreen from "@/assets/droplet-green.svg";
 import pillGreen from "@/assets/pill-green.svg";
 import dropletOrange from "@/assets/droplet-orange.svg";
 import pillOrange from "@/assets/pill-orange.svg";
+import type { BpmState, BpmTask } from "@/types/bpm";
+
+const W = 215;
+const H = 487;
+const LAST_PROJECT_KEY = "bpm:lastProject";
+const TEXT = "#434343";
+const BTN = "#063A39";
+
+type Project = { id: string; name: string };
+
+const loadLastProject = (): Project | null => {
+  try {
+    return JSON.parse(localStorage.getItem(LAST_PROJECT_KEY) || "null");
+  } catch {
+    return null;
+  }
+};
+
+const formatElapsed = (seconds: number) => {
+  const s = Math.max(0, seconds);
+  const mins = Math.floor(s / 60);
+  return `${mins}.${(s % 60).toString().padStart(2, "0")} min`;
+};
+
+const btnBase: React.CSSProperties = {
+  fontSize: "9.99px",
+  width: "54.93px",
+  height: "18.31px",
+  borderRadius: "3px",
+  fontWeight: 700,
+  transition: "background-color 120ms, color 120ms, border-color 120ms",
+};
+
+const FilledButton = ({ children, disabled, onClick }: { children: React.ReactNode; disabled?: boolean; onClick: () => void }) => (
+  <button
+    disabled={disabled}
+    onMouseDown={(e) => e.stopPropagation()}
+    onClick={onClick}
+    className="hover:!bg-[#6B6B6B] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:!bg-[#063A39]"
+    style={{ ...btnBase, backgroundColor: BTN, color: "white", border: 0 }}
+  >
+    {children}
+  </button>
+);
+
+const OutlineButton = ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
+  <button
+    onMouseDown={(e) => e.stopPropagation()}
+    onClick={onClick}
+    className="hover:!bg-[#3D3D3D] hover:!text-white hover:!border-[#3D3D3D]"
+    style={{ ...btnBase, backgroundColor: "transparent", color: BTN, border: `0.83px solid ${BTN}` }}
+  >
+    {children}
+  </button>
+);
 
 export const StickyTimer = () => {
+  const api = typeof window !== "undefined" ? window.bpm : undefined;
+  const isDesktop = !!api;
+
+  const [state, setState] = useState<BpmState | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-  const [time, setTime] = useState(0);
-  const [side, setSide] = useState<'left' | 'right'>('right');
-  const [isInMeeting, setIsInMeeting] = useState(false);
-  const [hasNewNotifications, setHasNewNotifications] = useState(false);
-  const [userSetPosition, setUserSetPosition] = useState(false);
-  const [nextMeetingTime, setNextMeetingTime] = useState<Date | null>(null);
-  const [showMeetingInput, setShowMeetingInput] = useState(false);
-  const [meetingTimeInput, setMeetingTimeInput] = useState("");
-  const [position, setPosition] = useState(() => ({
-    x: window.innerWidth - 215,
-    y: 50,
-  }));
+  const [side, setSide] = useState<"left" | "right">("right");
+  const [webY, setWebY] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const timerRef = useRef<HTMLDivElement>(null);
+  const [now, setNow] = useState(Date.now());
+  const [selected, setSelected] = useState<Project | null>(loadLastProject);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [tasks, setTasks] = useState<BpmTask[] | null>(null);
+  const [tasksMsg, setTasksMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  // Calculate time until meeting
-  const getTimeUntilMeeting = () => {
-    if (!nextMeetingTime) return "No meeting";
-    
-    const now = new Date();
-    const diff = nextMeetingTime.getTime() - now.getTime();
-    
-    if (diff < 0) return "Meeting started";
-    
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 60) return `${minutes} min`;
-    
-    const hours = Math.floor(minutes / 60);
-    const remainingMins = minutes % 60;
-    return `${hours}h ${remainingMins}m`;
-  };
-
-  const handleSetMeetingTime = () => {
-    if (meetingTimeInput) {
-      const meetingDate = new Date(meetingTimeInput);
-      setNextMeetingTime(meetingDate);
-      localStorage.setItem('nextMeetingTime', meetingDate.toISOString());
-      setShowMeetingInput(false);
-      setMeetingTimeInput("");
-    }
-  };
-
-  // Load saved meeting time on mount
+  // Desktop state sync
   useEffect(() => {
-    const saved = localStorage.getItem('nextMeetingTime');
-    if (saved) {
-      const meetingDate = new Date(saved);
-      if (meetingDate > new Date()) {
-        setNextMeetingTime(meetingDate);
-      } else {
-        localStorage.removeItem('nextMeetingTime');
-      }
-    }
-  }, []);
-
-  // Check for new notifications
-  useEffect(() => {
-    const checkNotifications = async () => {
-      // TODO: Replace with actual API call to check notifications
-      // For now, this is a placeholder that can be triggered by external events
-      // Example: const response = await fetch('https://bpm.zoomcharts.com:9000/api/notifications/unread');
-      // setHasNewNotifications(response.hasUnread);
+    if (!api) return;
+    api.getState().then(setState);
+    const offState = api.onStateChange(setState);
+    const offSide = api.window.onSide(setSide);
+    return () => {
+      offState();
+      offSide();
     };
+  }, [api]);
 
-    checkNotifications();
-    const interval = setInterval(checkNotifications, 30000); // Check every 30 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  // Check if in Teams meeting - only on initial load
-  useEffect(() => {
-    if (userSetPosition) return; // Don't override user position
-    
-    const checkTeamsMeeting = () => {
-      // Check if running in Teams context or if window title contains "Meeting"
-      const inTeams = window.location.href.includes('teams.microsoft.com') || 
-                      document.title.toLowerCase().includes('meeting') ||
-                      document.title.toLowerCase().includes('teams');
-      setIsInMeeting(inTeams);
-      
-      // Update position based on meeting status only if user hasn't set it
-      if (inTeams) {
-        setPosition(prev => ({
-          ...prev,
-          y: window.innerHeight - 487 - 50, // Bottom position
-        }));
-      } else {
-        setPosition(prev => ({
-          ...prev,
-          y: 50, // Top position
-        }));
-      }
-    };
-
-    checkTeamsMeeting();
-  }, []); // Only run once on mount
+  const timer = state?.timer ?? null;
+  const isActive = !!timer;
+  const canUseBpm = !!state?.apiConfigured && !!state?.loggedIn;
 
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-    if (isActive) {
-      interval = setInterval(() => {
-        setTime((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
+    if (!isActive) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
   }, [isActive]);
 
+  const elapsed = useMemo(
+    () => (timer ? Math.floor((now - new Date(timer.startedAt).getTime()) / 1000) : 0),
+    [timer, now],
+  );
+
+  // Hover / click-through
+  const expand = () => {
+    setIsExpanded(true);
+    api?.window.setInteractive(true);
+  };
+  const collapse = () => {
+    if (isDragging) return;
+    setIsExpanded(false);
+    setPickerOpen(false);
+    api?.window.setInteractive(false);
+  };
+
+  // Dragging: desktop moves the OS window (main snaps to edge); web moves the element.
+  const onDragStart = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    api?.window.dragStart();
+  };
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        const newY = e.clientY - dragOffset.y;
-        const midScreen = window.innerWidth / 2;
-        const newSide = e.clientX < midScreen ? 'left' : 'right';
-        
-        setPosition({
-          x: newSide === 'right' ? window.innerWidth - 215 : 0,
-          y: Math.max(0, Math.min(newY, window.innerHeight - 487)),
-        });
-        setSide(newSide);
-        setUserSetPosition(true); // Mark that user has manually positioned it
-      }
+    if (!isDragging) return;
+    const move = (e: MouseEvent) => {
+      if (isDesktop) return;
+      setSide(e.clientX < window.innerWidth / 2 ? "left" : "right");
+      setWebY(Math.max(0, Math.min(e.clientY - H / 2, window.innerHeight - H)));
     };
-
-    const handleMouseUp = () => {
+    const up = () => {
       setIsDragging(false);
+      api?.window.dragEnd();
     };
-
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
     };
-  }, [isDragging, dragOffset]);
+  }, [isDragging, isDesktop, api]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (timerRef.current) {
-      const rect = timerRef.current.getBoundingClientRect();
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      });
-      setIsDragging(true);
+  const openPicker = useCallback(async () => {
+    setPickerOpen((o) => !o);
+    if (!api || tasks) return;
+    const res = await api.listTasks();
+    if ("tasks" in res) {
+      setTasks(res.tasks);
+      setTasksMsg(res.tasks.length ? null : "No active tasks");
+    } else if ("error" in res) {
+      setTasksMsg(res.error.code === "BPM_API_NOT_CONFIGURED" ? "Task list not connected yet" : res.error.message);
     }
+  }, [api, tasks]);
+
+  const choose = (p: Project) => {
+    setSelected(p);
+    localStorage.setItem(LAST_PROJECT_KEY, JSON.stringify(p));
+    setPickerOpen(false);
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}.${secs.toString().padStart(2, "0")} min`;
+  const handleStart = async () => {
+    if (!api || !selected) return;
+    setBusy(true);
+    await api.start(selected.id);
+    setBusy(false);
+  };
+  const handleStop = async () => {
+    if (!api) return;
+    setBusy(true);
+    await api.stop();
+    setBusy(false);
+  };
+  const openBpm = (path?: string) => {
+    if (api) api.openBpm(path);
+    else window.open(`https://bpm.zoomcharts.com:9000/${path ?? ""}`, "_blank", "noopener");
   };
 
-  const handleStart = () => {
-    setIsActive(true);
-    setTime(0);
-  };
+  // Status line under the buttons
+  let status: { text: string; action?: { label: string; run: () => void } } | null = null;
+  if (!isDesktop) status = { text: "Desktop app" };
+  else if (!state) status = { text: "Connecting…" };
+  else if (!state.loggedIn) status = { text: "Not logged in", action: { label: "Connect BPM", run: () => api!.login() } };
+  else if (!state.apiConfigured) status = { text: "BPM timer sync setup needed", action: { label: "Open BPM", run: () => openBpm("#/app/apps") } };
+  else if (state.error) status = { text: state.error.message };
 
-  const handleStop = () => {
-    setIsActive(false);
-    setTime(0);
-  };
+  const projectLabel = timer?.projectName ?? selected?.name ?? "Select project";
+  const startDisabled = !canUseBpm || !selected || busy;
+
+  const wrapperStyle: React.CSSProperties = isDesktop
+    ? { position: "fixed", left: 0, top: 0, width: W, height: H }
+    : { position: "fixed", top: webY, width: W, height: H, [side]: 0 };
 
   return (
-    <div
-      ref={timerRef}
-      className="fixed z-[9999]"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        cursor: isDragging ? "grabbing" : "grab",
-        width: "215px",
-        height: "487px",
-      }}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => !isDragging && setIsExpanded(false)}
-      onMouseDown={handleMouseDown}
-    >
-      {/* Collapsed State */}
+    <div className="z-[9999] select-none" style={{ ...wrapperStyle, cursor: isDragging ? "grabbing" : "default" }}>
       {!isExpanded && (
-        <div className="absolute" style={{ width: "61px", height: "252px", top: "50%", transform: "translateY(-50%)", right: side === 'right' ? '0' : 'auto', left: side === 'left' ? '0' : 'auto' }}>
+        <div
+          className="absolute cursor-grab"
+          style={{ width: 61, height: 252, top: "50%", transform: "translateY(-50%)", [side]: 0 }}
+          onMouseEnter={expand}
+          onMouseDown={onDragStart}
+        >
           <img
             src={isActive ? pillGreen : pillOrange}
-            alt="Timer pill"
-            className="absolute top-0 w-full h-full transition-all duration-300"
-            style={{ left: 0, transform: side === 'left' ? 'scaleX(-1)' : 'none' }}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 w-full h-full"
+            style={{ transform: side === "left" ? "scaleX(-1)" : "none" }}
           />
-          
-          <div className="absolute inset-0 flex flex-col items-center justify-between py-6 px-3 text-[hsl(var(--timer-dark))]">
-            <div className="relative flex items-center gap-1">
-              {hasNewNotifications && <span className="text-xs font-medium">new</span>}
-              <div 
-                className="relative cursor-pointer hover:opacity-80 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setHasNewNotifications(false);
-                  window.open('https://bpm.zoomcharts.com:9000/#/app/notifications', '_blank');
-                }}
-              >
-                <Bell className="w-4 h-4" />
-                {hasNewNotifications && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-xs font-medium">{isActive ? "Active" : "START"}</div>
-              {isActive && (
-                <div className="text-sm font-bold whitespace-nowrap">
-                  {formatTime(time)}
-                </div>
-              )}
-            </div>
-            
-            <div className="text-xs text-center opacity-80">
-              <div 
-                className="mb-1 cursor-pointer hover:opacity-100 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMeetingInput(true);
-                }}
-              >
-                {nextMeetingTime ? "Meeting in" : "No meeting"}
-              </div>
-              {nextMeetingTime && (
-                <div className="font-semibold">{getTimeUntilMeeting()}</div>
-              )}
-            </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-2 text-center" style={{ color: TEXT }}>
+            <div className="text-xs font-medium">{isActive ? "Active" : "START"}</div>
+            {isActive && <div className="text-sm font-bold whitespace-nowrap">{formatElapsed(elapsed)}</div>}
           </div>
         </div>
       )}
 
-      {/* Expanded State - Droplet */}
       {isExpanded && (
-        <div 
-          className="absolute inset-0 animate-bounce-in" 
-          style={{ 
-            transform: side === 'left' ? 'scaleX(-1)' : 'none'
-          }}
+        <div
+          className="absolute inset-0 animate-bounce-in cursor-grab"
+          style={{ transform: side === "left" ? "scaleX(-1)" : "none" }}
+          onMouseLeave={collapse}
+          onMouseDown={onDragStart}
         >
-          <img
-            src={isActive ? dropletGreen : dropletOrange}
-            alt="Timer droplet"
-            className="absolute inset-0 w-full h-full transition-all duration-300"
-          />
-          
-          <div 
+          <img src={isActive ? dropletGreen : dropletOrange} alt="" draggable={false} className="absolute inset-0 w-full h-full" />
+
+          <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ 
-              paddingRight: side === 'right' ? '24px' : '0',
-              paddingLeft: side === 'left' ? '24px' : '0',
-              transform: side === 'left' ? 'scaleX(-1)' : 'none'
-            }}
+            style={{ paddingRight: side === "right" ? 24 : 0, paddingLeft: side === "left" ? 24 : 0, transform: side === "left" ? "scaleX(-1)" : "none" }}
           >
-            <div className="flex flex-col items-center gap-3 w-full max-w-[160px]" style={{ color: "#434343" }}>
-              <div className="self-end flex items-center gap-1 mb-1">
-                {hasNewNotifications && <span className="font-medium" style={{ fontSize: "12.48px" }}>new</span>}
-                <div 
-                  className="relative cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setHasNewNotifications(false); // Mark as read when clicked
-                    window.open('https://bpm.zoomcharts.com:9000/#/app/notifications', '_blank');
-                  }}
-                >
-                  <Bell className="w-3.5 h-3.5" />
-                  {hasNewNotifications && (
-                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-                  )}
-                </div>
-              </div>
-
+            <div className="relative flex flex-col items-center gap-3 w-full max-w-[160px]" style={{ color: TEXT }}>
               <div className="font-bold leading-none" style={{ fontSize: "24.97px" }}>
-                {formatTime(time)}
+                {formatElapsed(elapsed)}
               </div>
 
-              <div className="font-semibold text-center -mt-1" style={{ fontSize: "12.48px" }}>
-                Marketing / Meetings
-              </div>
+              <button
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={isActive ? undefined : openPicker}
+                disabled={isActive}
+                title={projectLabel}
+                className="flex items-center gap-0.5 font-semibold text-center -mt-1 max-w-full disabled:cursor-default"
+                style={{ fontSize: "12.48px" }}
+              >
+                <span className="truncate">{projectLabel}</span>
+                {!isActive && <ChevronDown className="w-3 h-3 shrink-0" />}
+              </button>
+
+              {pickerOpen && !isActive && (
+                <div
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className="absolute top-12 z-10 w-full max-h-[120px] overflow-y-auto rounded-[3px] bg-white/95 shadow-md text-left"
+                  style={{ fontSize: "10px" }}
+                >
+                  {loadLastProject() && (
+                    <button className="block w-full px-2 py-1 text-left hover:bg-black/5 font-semibold" onClick={() => choose(loadLastProject()!)}>
+                      Last: {loadLastProject()!.name}
+                    </button>
+                  )}
+                  {tasks?.map((t) => (
+                    <button key={t.id} className="block w-full px-2 py-1 text-left hover:bg-black/5 truncate" onClick={() => choose({ id: t.id, name: t.name })}>
+                      {t.name}
+                      {t.projectName && <span className="opacity-60"> · {t.projectName}</span>}
+                    </button>
+                  ))}
+                  {!tasks && !tasksMsg && <div className="px-2 py-1 opacity-60">{isDesktop ? "Loading…" : "Desktop app only"}</div>}
+                  {tasksMsg && <div className="px-2 py-1 opacity-60">{tasksMsg}</div>}
+                </div>
+              )}
 
               <div className="flex gap-2.5">
                 {!isActive ? (
                   <>
-                    <Button
-                      onClick={handleStart}
-                      className="font-bold shadow-none border-0 transition-colors"
-                      style={{
-                        backgroundColor: "#063A39",
-                        color: "white",
-                        fontSize: "9.99px",
-                        width: "54.93px",
-                        height: "18.31px",
-                        borderRadius: "3px",
-                        padding: "0",
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6B6B6B"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#063A39"}
-                    >
-                      START
-                    </Button>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open('https://bpm.zoomcharts.com:9000/#/app/my-tasks', '_blank');
-                      }}
-                      className="bg-transparent font-bold shadow-none transition-colors"
-                      style={{
-                        border: "0.83px solid #063A39",
-                        color: "#063A39",
-                        fontSize: "9.99px",
-                        width: "54.93px",
-                        height: "18.31px",
-                        borderRadius: "3px",
-                        padding: "0",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#3D3D3D";
-                        e.currentTarget.style.color = "white";
-                        e.currentTarget.style.borderColor = "#3D3D3D";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                        e.currentTarget.style.color = "#063A39";
-                        e.currentTarget.style.borderColor = "#063A39";
-                      }}
-                    >
-                      TASKS
-                    </Button>
+                    <FilledButton onClick={handleStart} disabled={startDisabled}>START</FilledButton>
+                    <OutlineButton onClick={() => openBpm("#/app/my-tasks")}>TASKS</OutlineButton>
                   </>
                 ) : (
                   <>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open('https://bpm.zoomcharts.com:9000/#/app/apps', '_blank');
-                      }}
-                      className="bg-transparent font-bold shadow-none transition-colors"
-                      style={{
-                        border: "0.83px solid #063A39",
-                        color: "#063A39",
-                        fontSize: "9.99px",
-                        width: "54.93px",
-                        height: "18.31px",
-                        borderRadius: "3px",
-                        padding: "0",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#3D3D3D";
-                        e.currentTarget.style.color = "white";
-                        e.currentTarget.style.borderColor = "#3D3D3D";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                        e.currentTarget.style.color = "#063A39";
-                        e.currentTarget.style.borderColor = "#063A39";
-                      }}
-                    >
-                      BPM
-                    </Button>
-                    <Button
-                      onClick={handleStop}
-                      className="font-bold shadow-none border-0 transition-colors"
-                      style={{
-                        backgroundColor: "#063A39",
-                        color: "white",
-                        fontSize: "9.99px",
-                        width: "54.93px",
-                        height: "18.31px",
-                        borderRadius: "3px",
-                        padding: "0",
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6B6B6B"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#063A39"}
-                    >
-                      STOP
-                    </Button>
+                    <OutlineButton onClick={() => openBpm("#/app/apps")}>BPM</OutlineButton>
+                    <FilledButton onClick={handleStop} disabled={busy}>STOP</FilledButton>
                   </>
                 )}
               </div>
 
-              <div className="text-center opacity-70">
-                <div 
-                  className="mb-0.5 cursor-pointer hover:opacity-100 transition-opacity"
-                  style={{ fontSize: "9px" }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMeetingInput(true);
-                  }}
-                >
-                  Meeting in
+              {status && (
+                <div className="text-center opacity-70 leading-tight" style={{ fontSize: "9px" }}>
+                  <div>{status.text}</div>
+                  {status.action && (
+                    <button
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={status.action.run}
+                      className="font-bold underline"
+                      style={{ fontSize: "10px" }}
+                    >
+                      {status.action.label}
+                    </button>
+                  )}
                 </div>
-                <div className="font-bold" style={{ fontSize: "10px" }}>
-                  {getTimeUntilMeeting()}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Meeting Time Input Dialog */}
-      {showMeetingInput && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]"
-          onClick={() => setShowMeetingInput(false)}
-        >
-          <div 
-            className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full mx-4"
-            onClick={(e) => e.stopPropagation()}
-            style={{ color: "#434343" }}
-          >
-            <h3 className="text-lg font-bold mb-4">Set Next Meeting</h3>
-            <input
-              type="datetime-local"
-              value={meetingTimeInput}
-              onChange={(e) => setMeetingTimeInput(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md mb-4"
-              style={{ fontSize: "14px" }}
-            />
-            <div className="flex gap-3">
-              <Button
-                onClick={handleSetMeetingTime}
-                className="flex-1 font-bold shadow-none border-0"
-                style={{
-                  backgroundColor: "#063A39",
-                  color: "white",
-                  fontSize: "12px",
-                  padding: "8px",
-                  borderRadius: "6px",
-                }}
-              >
-                Set Time
-              </Button>
-              <Button
-                onClick={() => setShowMeetingInput(false)}
-                className="flex-1 bg-transparent font-bold shadow-none"
-                style={{
-                  border: "1px solid #063A39",
-                  color: "#063A39",
-                  fontSize: "12px",
-                  padding: "8px",
-                  borderRadius: "6px",
-                }}
-              >
-                Cancel
-              </Button>
+              )}
             </div>
           </div>
         </div>
