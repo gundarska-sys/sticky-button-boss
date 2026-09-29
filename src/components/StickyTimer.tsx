@@ -144,10 +144,10 @@ export const StickyTimer = () => {
     setPickerOpen((o) => !o);
     if (!api || tasks) return;
     const res = await api.listTasks();
-    if (res.ok) {
+    if ("tasks" in res) {
       setTasks(res.tasks);
       setTasksMsg(res.tasks.length ? null : "No active tasks");
-    } else {
+    } else if ("error" in res) {
       setTasksMsg(res.error.code === "BPM_API_NOT_CONFIGURED" ? "Task list not connected yet" : res.error.message);
     }
   }, [api, tasks]);

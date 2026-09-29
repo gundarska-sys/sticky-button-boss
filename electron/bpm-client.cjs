@@ -53,13 +53,11 @@ class BpmClient {
     throw new BpmError("BPM_API_NOT_CONFIGURED", "Map myTasks response in bpm-client.cjs");
   }
 
-  // eslint-disable-next-line no-unused-vars
   async startTimer(projectId, allocationReason) {
     await this.request("startTimer");
     throw new BpmError("BPM_API_NOT_CONFIGURED", "Map startTimer request in bpm-client.cjs");
   }
 
-  // eslint-disable-next-line no-unused-vars
   async stopTimer(timerId, pauseMinutes) {
     await this.request("stopTimer");
     throw new BpmError("BPM_API_NOT_CONFIGURED", "Map stopTimer request in bpm-client.cjs");
