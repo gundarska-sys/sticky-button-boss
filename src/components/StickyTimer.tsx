@@ -109,7 +109,7 @@ export const StickyTimer = () => {
   }, []); // Only run once on mount
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isActive) {
       interval = setInterval(() => {
         setTime((prev) => prev + 1);
