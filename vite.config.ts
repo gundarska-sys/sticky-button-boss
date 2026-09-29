@@ -5,6 +5,10 @@ import { componentTagger } from "lovable-tagger";
 import electron from "vite-plugin-electron";
 import renderer from "vite-plugin-electron-renderer";
 
+// Electron is launched only on desktop platforms (local dev on Windows/macOS).
+// In the Linux web preview sandbox Electron can't run, so it is skipped there.
+const isDesktop = process.platform === "win32" || process.platform === "darwin";
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -14,7 +18,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(), 
     mode === "development" && componentTagger(),
-    electron([
+    isDesktop && electron([
       {
         entry: "electron/main.js",
       },
