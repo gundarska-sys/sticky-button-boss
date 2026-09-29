@@ -110,3 +110,9 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Electron desktop: transparent canvas behind the widget */
+html.desktop, html.desktop body, html.desktop #root {
+  background: transparent !important;
+  overflow: hidden;
+}
